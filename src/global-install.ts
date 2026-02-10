@@ -10,21 +10,57 @@ const SCRIPT_NAME = 'video-converter';
 const WINDOWS_SCRIPT_NAME = 'video-converter.cmd';
 
 function getScriptPath(): string {
-  // Путь к текущему скрипту
+  // Путь к директории src
   if (import.meta.url) {
-    return new URL(import.meta.url).pathname;
+    const currentFile = new URL(import.meta.url).pathname;
+    return join(dirname(currentFile), 'index.ts');
   }
-  return process.argv[1];
+  return join(dirname(process.argv[1]), 'src', 'index.ts');
+}
+
+function getBunPath(): string {
+  // Пытаемся найти bun в PATH
+  try {
+    const { execSync } = require('child_process');
+    return execSync('which bun || command -v bun || echo bun', { encoding: 'utf8' }).trim();
+  } catch {
+    return 'bun';
+  }
 }
 
 function getWindowsScriptContent(scriptPath: string): string {
   return `@echo off
+setlocal enabledelayedexpansion
+
+:: Проверяем наличие bun
+where bun >nul 2>&1
+if errorlevel 1 (
+    echo Ошибка: bun не найден в PATH
+    echo Установите Bun: https://bun.sh
+    exit /b 1
+)
+
 bun run "${scriptPath}" %*`;
 }
 
 function getUnixScriptContent(scriptPath: string): string {
+  const bunPath = getBunPath();
   return `#!/bin/bash
-bun run "${scriptPath}" "$@"`;
+
+# Проверяем наличие bun
+if ! command -v bun &> /dev/null; then
+    echo "Ошибка: bun не найден в PATH"
+    echo "Установите Bun: https://bun.sh"
+    exit 1
+fi
+
+# Проверяем существование файла
+if [ ! -f "${scriptPath}" ]; then
+    echo "Ошибка: файл не найден: ${scriptPath}"
+    exit 1
+fi
+
+${bunPath} run "${scriptPath}" "$@"`;
 }
 
 export async function showGlobalInstallMenu(): Promise<void> {
