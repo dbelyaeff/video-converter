@@ -1,0 +1,152 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build for macOS x64
+        run: bun build --compile --target=bun-darwin-x64 ./src/index.ts --outfile ./dist/video-converter-darwin-x64
+
+      - name: Build for macOS arm64
+        run: bun build --compile --target=bun-darwin-arm64 ./src/index.ts --outfile ./dist/video-converter-darwin-arm64
+
+      - name: Make executables
+        run: chmod +x ./dist/video-converter-darwin-*
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-binaries
+          path: ./dist/video-converter-darwin-*
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build for Linux x64
+        run: bun build --compile --target=bun-linux-x64 ./src/index.ts --outfile ./dist/video-converter-linux-x64
+
+      - name: Make executable
+        run: chmod +x ./dist/video-converter-linux-x64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-binaries
+          path: ./dist/video-converter-linux-x64
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build for Windows x64
+        run: bun build --compile --target=bun-windows-x64 ./src/index.ts --outfile ./dist/video-converter-windows-x64.exe
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-binaries
+          path: ./dist/video-converter-windows-x64.exe
+
+  release:
+    needs: [build-macos, build-linux, build-windows]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./dist
+          merge-multiple: true
+
+      - name: List downloaded files
+        run: ls -la ./dist/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./dist/video-converter-darwin-x64
+            ./dist/video-converter-darwin-arm64
+            ./dist/video-converter-linux-x64
+            ./dist/video-converter-windows-x64.exe
+          body: |
+            ## Video Converter CLI ${{ github.ref_name }}
+
+            ### Бинарники
+            - `video-converter-darwin-x64` - macOS Intel
+            - `video-converter-darwin-arm64` - macOS Apple Silicon
+            - `video-converter-linux-x64` - Linux 64-bit
+            - `video-converter-windows-x64.exe` - Windows 64-bit
+
+            ### Установка
+
+            **macOS/Linux:**
+            ```bash
+            chmod +x video-converter-*
+            sudo mv video-converter-* /usr/local/bin/video-converter
+            ```
+
+            **Windows:**
+            Скопируйте `.exe` файл в папку из PATH или запускайте напрямую.
+
+            ### Использование
+            ```bash
+            video-converter
+            ```
+
+            ### Возможности
+            - 🎥 Конвертация видео в 1080p, 720p, 480p
+            - 🎵 Извлечение аудио в MP3
+            - 🌐 Мультиязычный интерфейс (RU/EN)
+            - ⚙️ Настраиваемые битрейты
+            - 📊 Прогресс-бар конвертации
+            - 🔧 Автоматическая загрузка FFmpeg
+            - 🌍 Глобальная установка через настройки
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

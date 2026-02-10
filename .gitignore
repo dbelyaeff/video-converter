@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+*.exe
+video-converter-*
+!video-converter-*.ts
+
+# Environment
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+GITHUB_SETUP.md
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Test coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# User config (generated at runtime)
+config.yaml
+
+# FFmpeg (downloaded at runtime)
+ffmpeg/
+*.zip
+*.tar.xz

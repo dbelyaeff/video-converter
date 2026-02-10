@@ -1,0 +1,26 @@
+{
+  "name": "video-converter-cli",
+  "version": "1.0.0",
+  "description": "CLI приложение для конвертации видео на Bun + clack/prompts",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun run build.ts",
+    "build:local": "bun build --compile ./src/index.ts --outfile ./dist/video-converter"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "picocolors": "^1.0.0",
+    "yaml": "^2.3.4",
+    "globby": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
