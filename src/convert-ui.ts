@@ -46,6 +46,7 @@ export async function showConvertMenu(): Promise<void> {
 
   const cwd = process.cwd();
   const files = readdirSync(cwd)
+    .filter(f => !f.startsWith('.')) // Исключаем скрытые файлы
     .filter(isVideoFile)
     .map(f => join(cwd, f));
 
