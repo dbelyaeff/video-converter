@@ -11,11 +11,11 @@ const translations: Record<Language, Translations> = {
     menu: {
       title: '📋 Главное меню',
       convert: '🎥 Конвертировать видео',
-      settings: '⚙️  Настройки',
+      settings: '⚙️ Настройки',
       exit: '🚪 Выход'
     },
     settings: {
-      title: '⚙️  Настройки',
+      title: '⚙️ Настройки',
       language: '🌐 Язык',
       video: '🎬 Видео',
       audio: '🔊 Аудио',
@@ -111,11 +111,11 @@ const translations: Record<Language, Translations> = {
     menu: {
       title: '📋 Main Menu',
       convert: '🎥 Convert Video',
-      settings: '⚙️  Settings',
+      settings: '⚙️ Settings',
       exit: '🚪 Exit'
     },
     settings: {
-      title: '⚙️  Settings',
+      title: '⚙️ Settings',
       language: '🌐 Language',
       video: '🎬 Video',
       audio: '🔊 Audio',
